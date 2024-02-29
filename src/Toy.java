@@ -8,6 +8,10 @@ public class Toy {
         return Id;
     }
 
+    public int getCount() {
+        return Count;
+    }
+
     public Float getWeight() {
         return Weight;
     }

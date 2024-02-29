@@ -1,7 +1,5 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,7 +14,7 @@ public class ToyService implements ToyServiceInterface, RandomToy{
 
     @Override
     public void addToy(List<Toy> toyList, String name, float weight,int count) throws NumberFormatException{
-        if (weight > 0 && weight < 1)
+        if (weight < 0 && weight > 1)
             throw new NumberFormatException("Вероятность выпадния игрушки не может быть больше или равна 1");
         toyList.add(new Toy(++CountToy, name, weight, count));
     }
@@ -24,10 +22,11 @@ public class ToyService implements ToyServiceInterface, RandomToy{
     @Override
     public void initToy(List<Toy> toyList) throws FileNotFoundException {
         File f = new File("Data/data.txt");
+
         if (f.exists()){
             try(Scanner scanner = new Scanner(f);){
 
-                while (scanner.hasNext()){
+                while (scanner.hasNextLine()){
                     List<String> toy = List.of(scanner.nextLine().split(" "));
                     String name = toy.get(0);
                     float weight = Float.parseFloat(toy.get(1));
@@ -35,6 +34,8 @@ public class ToyService implements ToyServiceInterface, RandomToy{
                     addToy(toyList, name, weight, count);
                 }
             }
+        }else {
+            System.out.println("Файл не найден");
         }
     }
 
@@ -51,8 +52,17 @@ public class ToyService implements ToyServiceInterface, RandomToy{
     }
 
     @Override
-    public void givetoy(List<Toy> toyList) {
-        toyList.remove(toyList.size()-1);
+    public void givetoy(List<Toy> toyList){
+        try(FileWriter fw = new FileWriter("Winning.txt", true);){
+            fw.append(toyList.get(0).getName() + "\n");
+            toyList.remove(0);
+        }catch (IOException e){
+            System.out.println("Файл не записан");
+        }
+        catch (IndexOutOfBoundsException e){
+            System.out.println("Нет игрушек на выдачу");
+        }
+
     }
 
     @Override
@@ -64,10 +74,15 @@ public class ToyService implements ToyServiceInterface, RandomToy{
                 ids.add(toy.getId());
             }
         }
-        int id = random.nextInt(0, ids.size()-1);
+
+        int id = ids.get(random.nextInt(0, ids.size()-1));
         for (Toy toy: toyList){
-            if (toy.getId() == id)
+            if (toy.getId() == id ){
+
+                if(toy.getCount() == 1)
+                        toyList.remove(toy);
                 return toy;
+            }
         }
         return null;
     }

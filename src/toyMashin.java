@@ -1,7 +1,7 @@
 public interface toyMashin {
     void initToy();
-    void addToy(Toy toy);
+    void addToy(String name, float weight, int count);
     void setWeight(int id, float weight);
-    Toy choiseToy();
-    void giveToy(int id);
+    void choiseToy();
+    void giveToy();
 }
